@@ -1,6 +1,7 @@
 #!/usr/bin/make -f
 
-BASENAME ?= liox-$(shell git describe --tags)-$(LIOX_ARCH)$(LIOX_CONTEST)
+# BASENAME ?= liox-$(shell git describe --tags)-$(LIOX_ARCH)$(LIOX_CONTEST)
+BASENAME := liox-test-build
 QEMU ?= qemu-system-x86_64 -enable-kvm -cpu host
 
 .PHONY: clean vm iso
@@ -15,16 +16,16 @@ $(BASENAME).iso:
 	mv live-image-*.hybrid.iso $@
 
 $(BASENAME).raw:
-	qemu-img create -f raw $@ 7.45G
+	qemu-img create -f raw $@ 20G
 
 clean:
 	lb clean
 
 AUTO := preseed/file=/cdrom/preseed/auto.cfg
 DBG := DEBCONF_DEBUG=5
-vm: $(BASENAME).raw $(BASENAME).iso
+vm:
 	$(QEMU) -no-reboot -smp 2 \
-		-m 256M \
+		-m 1G \
 		-monitor stdio \
 		-display gtk \
 		-cdrom $(BASENAME).iso \
@@ -32,3 +33,11 @@ vm: $(BASENAME).raw $(BASENAME).iso
 		-kernel binary/install/vmlinuz \
 		-initrd binary/install/initrd.gz \
 		-append "auto=true priority=critical keymap=us $(AUTO) $(DBG)"
+
+run-vm:
+	$(QEMU) -enable-kvm -no-reboot -smp 2 \
+		-cpu host \
+		-m 4G \
+		-monitor stdio \
+		-display gtk \
+		-drive file=$(BASENAME).raw,format=raw
