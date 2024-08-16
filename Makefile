@@ -1,7 +1,7 @@
 #!/usr/bin/make -f
 
 # BASENAME ?= liox-$(shell git describe --tags)-$(LIOX_ARCH)$(LIOX_CONTEST)
-BASENAME := liox-test-build
+BASENAME := liox-test-build-uefi
 QEMU ?= qemu-system-x86_64 -enable-kvm -cpu host
 
 .PHONY: clean vm iso
@@ -16,7 +16,7 @@ $(BASENAME).iso:
 	mv live-image-*.hybrid.iso $@
 
 $(BASENAME).raw:
-	qemu-img create -f raw $@ 20G
+	qemu-img create -f raw $@ 12G
 
 clean:
 	lb clean
@@ -32,6 +32,7 @@ vm:
 		-drive file=$(BASENAME).raw,format=raw \
 		-kernel binary/install/vmlinuz \
 		-initrd binary/install/initrd.gz \
+		-bios /usr/share/ovmf/x64/OVMF.fd \
 		-append "auto=true priority=critical keymap=us $(AUTO) $(DBG)"
 
 run-vm:
